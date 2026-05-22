@@ -1,5 +1,10 @@
 # Twitter Demo
 
+![Swift](https://img.shields.io/badge/Swift-3%2B-F05138?logo=swift&logoColor=white)
+![iOS 9+](https://img.shields.io/badge/iOS-9%2B-000000?logo=apple&logoColor=white)
+![UIKit](https://img.shields.io/badge/UIKit-Auto%20Layout-blue)
+![OAuth](https://img.shields.io/badge/Auth-OAuth%201.0a-gray)
+
 An iOS Twitter client built with Swift, UIKit, and Alamofire, integrating the Twitter API v1.1 via OAuth 1.0a.
 
 ## Features
