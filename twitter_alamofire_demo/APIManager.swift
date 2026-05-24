@@ -28,8 +28,12 @@ class APIManager: SessionManager {
     func login(success: @escaping () -> (), failure: @escaping (Error?) -> ()) {
 
         // Add callback url to open app when returning from Twitter login on web
-        let callbackURL = URL(string: APIManager.callbackURLString)!
-        oauthManager.authorize(withCallbackURL: callbackURL, success: { (credential, _response, parameters) in
+        guard let callbackURL = URL(string: APIManager.callbackURLString) else {
+            failure(nil)
+            return
+        }
+        oauthManager.authorize(withCallbackURL: callbackURL, success: { [weak self] (credential, _response, parameters) in
+            guard let self = self else { return }
 
             // Save Oauth tokens
             self.save(credential: credential)
@@ -38,7 +42,7 @@ class APIManager: SessionManager {
                 if let error = error {
                     failure(error)
                 } else if let user = user {
-                    print("Welcome \(user.name)")
+                    print("Welcome \(user.name ?? "")")
 
                     // MARK: TODO: set User.current, so that it's persisted
 
@@ -59,7 +63,11 @@ class APIManager: SessionManager {
     }
 
     func getCurrentAccount(completion: @escaping (User?, Error?) -> ()) {
-        request(URL(string: "https://api.twitter.com/1.1/account/verify_credentials.json")!)
+        guard let url = URL(string: "https://api.twitter.com/1.1/account/verify_credentials.json") else {
+            completion(nil, JSONError.parsing("Invalid URL"))
+            return
+        }
+        request(url)
             .validate()
             .responseJSON { response in
                 switch response.result {
@@ -80,19 +88,21 @@ class APIManager: SessionManager {
 
         // This uses tweets from disk to avoid hitting rate limit. Comment out if you want fresh
         // tweets,
-        if let data = UserDefaults.standard.object(forKey: "hometimeline_tweets") as? Data {
-            let tweetDictionaries = NSKeyedUnarchiver.unarchiveObject(with: data) as! [[String: Any]]
-            let tweets = tweetDictionaries.flatMap({ (dictionary) -> Tweet in
-                Tweet(dictionary: dictionary)
-            })
-
+        if let data = UserDefaults.standard.object(forKey: "hometimeline_tweets") as? Data,
+           let tweetDictionaries = NSKeyedUnarchiver.unarchiveObject(with: data) as? [[String: Any]] {
+            let tweets = tweetDictionaries.compactMap { Tweet(dictionary: $0) }
             completion(tweets, nil)
             return
         }
 
-        request(URL(string: "https://api.twitter.com/1.1/statuses/home_timeline.json")!, method: .get)
+        guard let url = URL(string: "https://api.twitter.com/1.1/statuses/home_timeline.json") else {
+            completion(nil, JSONError.parsing("Invalid URL"))
+            return
+        }
+        request(url, method: .get)
             .validate()
-            .responseJSON { (response) in
+            .responseJSON { [weak self] (response) in
+                guard self != nil else { return }
                 switch response.result {
                 case .failure(let error):
                     completion(nil, error)
@@ -107,11 +117,8 @@ class APIManager: SessionManager {
 
                     let data = NSKeyedArchiver.archivedData(withRootObject: tweetDictionaries)
                     UserDefaults.standard.set(data, forKey: "hometimeline_tweets")
-                    UserDefaults.standard.synchronize()
 
-                    let tweets = tweetDictionaries.flatMap({ (dictionary) -> Tweet in
-                        Tweet(dictionary: dictionary)
-                    })
+                    let tweets = tweetDictionaries.compactMap { Tweet(dictionary: $0) }
                     completion(tweets, nil)
                 }
         }
@@ -181,12 +188,11 @@ class APIManager: SessionManager {
     private func retrieveCredentials() -> OAuthSwiftCredential? {
         let keychain = Keychain()
 
-        if let data = keychain[data: "twitter_credentials"] {
-            let credential = NSKeyedUnarchiver.unarchiveObject(with: data) as! OAuthSwiftCredential
+        if let data = keychain[data: "twitter_credentials"],
+           let credential = NSKeyedUnarchiver.unarchiveObject(with: data) as? OAuthSwiftCredential {
             return credential
-        } else {
-            return nil
         }
+        return nil
     }
 
     // MARK: Clear tokens in Keychain
