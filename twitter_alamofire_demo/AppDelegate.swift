@@ -18,11 +18,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // MARK: TODO: Check for logged in user
 
-        NotificationCenter.default.addObserver(forName: Notification.Name("didLogout"), object: nil, queue: OperationQueue.main) { (Notification) in
+        NotificationCenter.default.addObserver(forName: Notification.Name("didLogout"), object: nil, queue: OperationQueue.main) { [weak self] (Notification) in
             print("Logout notification received")
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
-            self.window?.rootViewController = loginVC
+            self?.window?.rootViewController = loginVC
         }
 
         return true
@@ -30,16 +30,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: TODO: Open URL
     // OAuth step 2
-    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         // Handle urlcallback sent from Twitter
         APIManager.shared.handle(url: url)
         return true
     }
 
-
-
-
-
-
 }
-
