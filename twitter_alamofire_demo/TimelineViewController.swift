@@ -10,8 +10,7 @@ import UIKit
 
 class TimelineViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
-
-  var tweets: [Tweet] = []
+    var tweets: [Tweet] = []
 
     @IBOutlet weak var tableView: UITableView!
 
@@ -24,8 +23,8 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 250
 
-
-        APIManager.shared.getHomeTimeLine { (tweets, error) in
+        APIManager.shared.getHomeTimeLine { [weak self] (tweets, error) in
+            guard let self = self else { return }
             if let tweets = tweets {
                 self.tweets = tweets
                 self.tableView.reloadData()
@@ -39,14 +38,15 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
         return tweets.count
     }
 
-  @IBAction func onComposeButton(_ sender: Any) {
-    performSegue(withIdentifier: "composeIdentifier", sender: self)
-  }
-  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as! TweetCell
+    @IBAction func onComposeButton(_ sender: Any) {
+        performSegue(withIdentifier: "composeIdentifier", sender: self)
+    }
 
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "TweetCell", for: indexPath) as? TweetCell else {
+            return UITableViewCell()
+        }
         cell.tweet = tweets[indexPath.row]
-
         return cell
     }
 
@@ -54,21 +54,7 @@ class TimelineViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-
-
     @IBAction func didTapLogout(_ sender: Any) {
         APIManager.shared.logout()
     }
-
-
-    /*
-     // MARK: - Navigation
-
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
-     }
-     */
-
 }
