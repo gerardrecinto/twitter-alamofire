@@ -12,26 +12,19 @@ class LoginViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
     }
 
-
-
     @IBAction func didTapLogin(_ sender: Any) {
-        APIManager.shared.login(success: {
-            self.performSegue(withIdentifier: "loginSegue", sender: nil)
+        APIManager.shared.login(success: { [weak self] in
+            self?.performSegue(withIdentifier: "loginSegue", sender: nil)
         }) { (error) in
             if let error = error {
                 print(error.localizedDescription)
             }
         }
     }
-
-
-
-
 }
