@@ -11,53 +11,54 @@ import Foundation
 class Tweet {
 
     // MARK: Properties
-    var id: Int64 // For favoriting, retweeting & replying
-    var text: String // Text content of tweet
-    var favoriteCount: Int? // Update favorite count label
-    var favorited: Bool? // Configure favorite button
-    var retweetCount: Int // Update favorite count label
-    var retweeted: Bool // Configure retweet button
-    var user: User? // Contains name, screenname, etc. of tweet author
-    var createdAtString: String // Display date
-  var name: String?
-  var screenname: String?
-  var profileUrl: URL?
-  //var favorited: Bool
- // var retweeted: Bool
- // var tweetId: Int
+    var id: Int64
+    var text: String
+    var favoriteCount: Int?
+    var favorited: Bool?
+    var retweetCount: Int
+    var retweeted: Bool
+    var user: User?
+    var createdAtString: String
+    var name: String?
+    var screenname: String?
+    var profileUrl: URL?
+
     // MARK: - Create initializer with dictionary
-  init(dictionary: [String: Any]) {
-        id = dictionary["id"] as! Int64
-        text = dictionary["text"] as! String
+    init?(dictionary: [String: Any]) {
+        // Support both Int and Int64 from JSON
+        if let idInt64 = dictionary["id"] as? Int64 {
+            id = idInt64
+        } else if let idInt = dictionary["id"] as? Int {
+            id = Int64(idInt)
+        } else {
+            return nil
+        }
+
+        guard let tweetText = dictionary["text"] as? String else { return nil }
+        text = tweetText
+
         favoriteCount = dictionary["favorite_count"] as? Int
         favorited = dictionary["favorited"] as? Bool
-        retweetCount = dictionary["retweet_count"] as! Int
-        retweeted = dictionary["retweeted"] as! Bool
+        retweetCount = dictionary["retweet_count"] as? Int ?? 0
+        retweeted = dictionary["retweeted"] as? Bool ?? false
 
-        let user = dictionary["user"] as! [String: Any]
-      self.user = User(dictionary: user)
-      self.name = self.user?.name
+        if let userDict = dictionary["user"] as? [String: Any] {
+            let userObj = User(dictionary: userDict)
+            self.user = userObj
+            self.name = userObj?.name
+            self.screenname = userObj?.screenname
+            self.profileUrl = userObj?.profileUrl
+        }
 
-
-      self.screenname = self.user?.screenname as! String
-      self.profileUrl = self.user?.profileUrl as! URL
-     // self.tagline = self.user.tagline
-      self.id = Int64(dictionary["id"] as! Int)
-      self.favorited = dictionary["favorited"] as! Bool
-      self.retweeted = dictionary["retweeted"] as! Bool
-        let createdAtOriginalString = dictionary["created_at"] as! String
+        let createdAtOriginalString = dictionary["created_at"] as? String ?? ""
         let formatter = DateFormatter()
-        // Configure the input format to parse the date string
         formatter.dateFormat = "E MMM d HH:mm:ss Z y"
-        // Convert String to Date
-        let date = formatter.date(from: createdAtOriginalString)!
-        // Configure output format
-        formatter.dateStyle = .short
-        formatter.timeStyle = .none
-        // Convert Date to String
-        createdAtString = formatter.string(from: date)
-
-
+        if let date = formatter.date(from: createdAtOriginalString) {
+            formatter.dateStyle = .short
+            formatter.timeStyle = .none
+            createdAtString = formatter.string(from: date)
+        } else {
+            createdAtString = createdAtOriginalString
+        }
     }
 }
-
