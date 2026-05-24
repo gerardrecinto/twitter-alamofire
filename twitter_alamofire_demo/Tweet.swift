@@ -9,7 +9,7 @@
 import Foundation
 
 class Tweet {
-    
+
     // MARK: Properties
     var id: Int64 // For favoriting, retweeting & replying
     var text: String // Text content of tweet
@@ -33,11 +33,11 @@ class Tweet {
         favorited = dictionary["favorited"] as? Bool
         retweetCount = dictionary["retweet_count"] as! Int
         retweeted = dictionary["retweeted"] as! Bool
-        
+
         let user = dictionary["user"] as! [String: Any]
       self.user = User(dictionary: user)
       self.name = self.user?.name
-      
+
 
       self.screenname = self.user?.screenname as! String
       self.profileUrl = self.user?.profileUrl as! URL
@@ -56,8 +56,8 @@ class Tweet {
         formatter.timeStyle = .none
         // Convert Date to String
         createdAtString = formatter.string(from: date)
-        
-        
+
+
     }
 }
 

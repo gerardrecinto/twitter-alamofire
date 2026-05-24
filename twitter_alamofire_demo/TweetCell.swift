@@ -11,7 +11,7 @@ import Alamofire
 import AlamofireImage
 
 class TweetCell: UITableViewCell {
-    
+
   @IBOutlet weak var profileButton: UIImageView!
   @IBOutlet weak var tweetTextLabel: UILabel!
   //@IBOutlet weak var profileButton: UIButton!
@@ -40,7 +40,7 @@ class TweetCell: UITableViewCell {
           authorButton.text = tweet.name as? String
           screennameLabel.text = "@" + (tweet.screenname as? String)!
          // dateLabel.text = String(describing: tweet.timestamp)
-        
+
        /*   timeDiff = Int(Date().timeIntervalSince(tweet.createdAtString as! Date))
           if timeDiff < minute {
             timeString = String("less than a minute ago")
@@ -57,12 +57,12 @@ class TweetCell: UITableViewCell {
             timeDiff = timeDiff/day
             timeString = String(timeDiff) + " days ago"
           }*/
-          
+
           dateLabel.text = timeString
-          
+
           let replyImage = UIImage(named: "reply-icon")
           replyButton.setImage(replyImage, for: .normal)
-          
+
           if tweet.retweeted == false {
             let retweetImage = UIImage(named: "retweet-icon")
             retweetButton.setImage(retweetImage, for: .normal)
@@ -73,7 +73,7 @@ class TweetCell: UITableViewCell {
             retweetButton.setImage(retweetImage, for: .normal)
             didRt = true
           }
-          
+
           if tweet.favorited == false {
             let likeImage = UIImage(named: "favor-icon")
             likeButton.setImage(likeImage, for: .normal)
@@ -84,11 +84,11 @@ class TweetCell: UITableViewCell {
             likeButton.setImage(likeImage, for: .normal)
             didLike = true
           }
-          
+
           likeCount = tweet.favoriteCount!
           rtCount = tweet.retweetCount
           setButtonCount()
-          
+
         //  profileButton.af_setImage(for: .normal, url: tweet.profileUrl!)
           profileButton.af_setImage(withURL: tweet.profileUrl!)
          // myButton.imageView?.contentMode = .scaleAspectFit
@@ -96,7 +96,7 @@ class TweetCell: UITableViewCell {
         //  profileButton.imageView?.updateConstraintsIfNeeded()
         }
     }
-    
+
   @IBAction func onLike(_ sender: Any) {
     if didLike{
       likeCount = likeCount - 1
@@ -126,13 +126,13 @@ class TweetCell: UITableViewCell {
     authorButton.preferredMaxLayoutWidth = authorButton.frame.size.width// Initialization code
 
   }
-    
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        
+
         // Configure the view for the selected state
     }
-  
+
   func setButtonCount() {
     if likeCount < 1000 {
       likeCountString = String(likeCount)
@@ -140,9 +140,9 @@ class TweetCell: UITableViewCell {
     else {
       likeCountString = String((likeCount/1000)) + "K"
     }
-    
+
     likeButton.setTitle(likeCountString, for: .normal)
-    
+
     if rtCount < 1000 {
       rtCountString = String(rtCount)
     }
@@ -152,5 +152,5 @@ class TweetCell: UITableViewCell {
     retweetButton.setTitle(rtCountString, for: .normal)
   }
 
-    
+
 }

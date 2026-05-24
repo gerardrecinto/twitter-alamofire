@@ -13,7 +13,7 @@ import OAuthSwiftAlamofire
 import KeychainAccess
 
 class APIManager: SessionManager {
-    
+
     // MARK: TODO: Add App Keys
     static let consumerKey = "IZuCGjQlBdcKjg8Qt2ptVrV2i"
     static let consumerSecret = "QAnM1igghgIhjHy3iTw8ki6k6ZO0zYI0n5udtrN091AOHUy7eG"
@@ -21,27 +21,27 @@ class APIManager: SessionManager {
     static let requestTokenURL = "https://api.twitter.com/oauth/request_token"
     static let authorizeURL = "https://api.twitter.com/oauth/authorize"
     static let accessTokenURL = "https://api.twitter.com/oauth/access_token"
-    
+
     static let callbackURLString = "alamoTwitter://"
-    
+
     // MARK: Twitter API methods
     func login(success: @escaping () -> (), failure: @escaping (Error?) -> ()) {
-        
+
         // Add callback url to open app when returning from Twitter login on web
         let callbackURL = URL(string: APIManager.callbackURLString)!
         oauthManager.authorize(withCallbackURL: callbackURL, success: { (credential, _response, parameters) in
-            
+
             // Save Oauth tokens
             self.save(credential: credential)
-            
+
             self.getCurrentAccount(completion: { (user, error) in
                 if let error = error {
                     failure(error)
                 } else if let user = user {
                     print("Welcome \(user.name)")
-                    
+
                     // MARK: TODO: set User.current, so that it's persisted
-                    
+
                     success()
                 }
             })
@@ -49,10 +49,10 @@ class APIManager: SessionManager {
             failure(error)
         }
     }
-    
+
     func logout() {
         clearCredentials()
-        
+
         // TODO: Clear current user by setting it to nil
 
         NotificationCenter.default.post(name: NSNotification.Name("didLogout"), object: nil)
@@ -65,7 +65,7 @@ class APIManager: SessionManager {
                 switch response.result {
                 case .failure(let error):
                     completion(nil, error)
-                    break;
+                    break
                 case .success:
                     guard let userDictionary = response.result.value as? [String: Any] else {
                         completion(nil, JSONError.parsing("Unable to create user dictionary"))
@@ -75,7 +75,7 @@ class APIManager: SessionManager {
                 }
         }
     }
-        
+
     func getHomeTimeLine(completion: @escaping ([Tweet]?, Error?) -> ()) {
 
         // This uses tweets from disk to avoid hitting rate limit. Comment out if you want fresh
@@ -116,32 +116,32 @@ class APIManager: SessionManager {
                 }
         }
     }
-    
+
     // MARK: TODO: Favorite a Tweet
-    
+
     // MARK: TODO: Un-Favorite a Tweet
-    
+
     // MARK: TODO: Retweet
-    
+
     // MARK: TODO: Un-Retweet
-    
+
     // MARK: TODO: Compose Tweet
-    
+
     // MARK: TODO: Get User Timeline
-    
-    
+
+
     //--------------------------------------------------------------------------------//
-    
-    
+
+
     //MARK: OAuth
     static var shared: APIManager = APIManager()
-    
+
     var oauthManager: OAuth1Swift!
-    
+
     // Private init for singleton only
     private init() {
         super.init()
-        
+
         // Create an instance of OAuth1Swift with credentials and oauth endpoints
         oauthManager = OAuth1Swift(
             consumerKey: APIManager.consumerKey,
@@ -150,37 +150,37 @@ class APIManager: SessionManager {
             authorizeUrl: APIManager.authorizeURL,
             accessTokenUrl: APIManager.accessTokenURL
         )
-        
+
         // Retrieve access token from keychain if it exists
         if let credential = retrieveCredentials() {
             oauthManager.client.credential.oauthToken = credential.oauthToken
             oauthManager.client.credential.oauthTokenSecret = credential.oauthTokenSecret
         }
-        
+
         // Assign oauth request adapter to Alamofire SessionManager adapter to sign requests
         adapter = oauthManager.requestAdapter
     }
-    
+
     // MARK: Handle url
     // OAuth Step 3
     // Finish oauth process by fetching access token
     func handle(url: URL) {
         OAuth1Swift.handle(url: url)
     }
-    
+
     // MARK: Save Tokens in Keychain
     private func save(credential: OAuthSwiftCredential) {
-        
+
         // Store access token in keychain
         let keychain = Keychain()
         let data = NSKeyedArchiver.archivedData(withRootObject: credential)
         keychain[data: "twitter_credentials"] = data
     }
-    
+
     // MARK: Retrieve Credentials
     private func retrieveCredentials() -> OAuthSwiftCredential? {
         let keychain = Keychain()
-        
+
         if let data = keychain[data: "twitter_credentials"] {
             let credential = NSKeyedUnarchiver.unarchiveObject(with: data) as! OAuthSwiftCredential
             return credential
@@ -188,7 +188,7 @@ class APIManager: SessionManager {
             return nil
         }
     }
-    
+
     // MARK: Clear tokens in Keychain
     private func clearCredentials() {
         // Store access token in keychain

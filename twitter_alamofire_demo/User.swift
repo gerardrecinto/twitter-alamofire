@@ -9,7 +9,7 @@
 import Foundation
 
 class User {
-    
+
     var name: String?
   var screenname: String?
   var profileUrl: URL?
@@ -19,7 +19,7 @@ class User {
   var tweetsCount: Int = 0
   var followerCount: Int = 0
   var followingCount: Int = 0
-  
+
   init(dictionary: [String: Any]) {
         name = dictionary["name"] as! String
       screenname = dictionary["screen_name"] as? String
